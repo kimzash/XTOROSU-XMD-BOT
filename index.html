@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>XTOROSU XMD BOT</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',sans-serif;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+      background:linear-gradient(270deg,#ff5f6d,#ffc371,#3ca55c,#3f2b96,#ff512f,#dd2476);
+      background-size:1200% 1200%;
+      animation:bgFlow 30s ease infinite;
+      position:relative;
+      text-align:center;
+    }
+    @keyframes bgFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    /* -------- TITLE -------- */
+    .main-title{
+      position:absolute;
+      top:1%;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:2;
+      width:100%;
+      pointer-events:none;
+    }
+    .main-title .line1{
+      font-weight:900;
+      white-space:nowrap;
+      font-size:clamp(3.5rem,13vw,10rem); /* fills width */
+      color:#000;
+      text-shadow:2px 2px 6px rgba(255,255,255,.4);
+    }
+    .main-title .line2{
+      font-weight:900;
+      margin-top:0.1em;
+      font-size:clamp(3rem,11vw,8rem);  /* big */
+      color:#000;
+      text-shadow:2px 2px 6px rgba(255,255,255,.4);
+    }
+
+    /* -------- MOVING TEXT -------- */
+    .moving-text{position:absolute;font-size:2.8rem;font-weight:700;opacity:.8;white-space:nowrap;pointer-events:none;z-index:1}
+    @keyframes left{0%{transform:translateX(110vw)}100%{transform:translateX(-110vw)}}
+    @keyframes right{0%{transform:translateX(-110vw)}100%{transform:translateX(110vw)}}
+    #text1{top:16%;color:#00eaff;animation:left 16s linear infinite}
+    #text2{bottom:18%;color:#adff2f;animation:right 20s linear infinite 3s}
+    #text3{top:26%;color:#ff66ff;animation:left 18s linear infinite 6s}
+    #text4{top:34%;color:#ffa07a;animation:right 22s linear infinite 9s}
+    #text5{bottom:26%;color:#7fffd4;animation:left 17s linear infinite 12s}
+    #text6{bottom:34%;color:#ff1493;animation:right 19s linear infinite 15s}
+
+    /* -------- FORM -------- */
+    .container{background:rgba(255,255,255,.9);padding:35px 28px;border-radius:18px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,.3);z-index:3}
+    h2{color:#10ac84;margin-bottom:18px;font-size:1.2rem;text-transform:uppercase}
+    input[type=tel]{padding:14px 16px;font-size:1rem;width:260px;border:2px solid #10ac84;border-radius:10px;outline:none;text-align:center}
+    .btn{margin-top:18px;padding:12px 22px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:1rem;cursor:pointer;text-decoration:none;display:inline-block}
+
+    /* -------- LOADER -------- */
+    .loader-wrapper{display:none;flex-direction:column;align-items:center;justify-content:center;margin-top:20px}
+    .loading-label{color:#fff;background:#10ac84;padding:10px 18px;border-radius:10px;font-weight:bold;font-size:1rem;margin-bottom:18px}
+    .connect-label{color:#000;font-size:1rem;margin-bottom:10px;display:none}
+    .progress-bar{width:300px;height:20px;border-radius:10px;background:#ccc;overflow:hidden;margin-bottom:20px}
+    .progress{height:100%;width:0%;background:#25D366;transition:width .5s ease}
+    .error-msg{display:none;font-size:1.1rem;color:#e74c3c;max-width:300px;margin-bottom:18px}
+    .invalid-number{display:none;color:#e84118;margin-top:10px;font-weight:bold}
+    .bold-server{font-weight:bold;color:#000}
+  </style>
+</head>
+<body onload="document.getElementById('bgMusic').play()">
+
+  <!-- TITLE -->
+  <div class="main-title">
+    <div class="line1">XTOROSU XMD</div>
+    <div class="line2">BOT</div>
+  </div>
+
+  <!-- MOVING TEXT -->
+  <div id="text1" class="moving-text">WhatsApp Bot</div>
+  <div id="text2" class="moving-text">Deploy XTOROSU</div>
+  <div id="text3" class="moving-text">More than 500+ commands</div>
+  <div id="text4" class="moving-text">The best WhatsApp bot</div>
+  <div id="text5" class="moving-text">Get Temporary foreign numbers</div>
+  <div id="text6" class="moving-text">Order music & Create images</div>
+
+  <!-- FORM -->
+  <div class="container" id="formContainer">
+    <h2>ENTER WHATSAPP NUMBER TO BE DEPLOYED</h2>
+    <input type="tel" id="whatsappNumber" placeholder="Mobile number 92XXXX" oninput="validateInput(this)">
+    <div class="invalid-number" id="invalidNumber">Please enter a valid number</div>
+    <br>
+    <button class="btn" onclick="startLoading()" id="receiveBtn">Receive code</button>
+
+    <!-- Loader/Error -->
+    <div class="loader-wrapper" id="loaderWrapper">
+      <div class="loading-label" id="loadingLabel">Please wait as we generate a pairing code</div>
+      <div class="connect-label" id="connectLabel">Trying to connect to the server...</div>
+      <div class="progress-bar" id="progressBar"><div class="progress" id="progress"></div></div>
+      <div class="error-msg" id="errorMsg"></div>
+      <button class="btn" id="tryAgainBtn" onclick="resetForm()" style="display:none">Try Again</button>
+      <a href="https://wa.me/254787482014?text=Please%20sir%20I%20need%20to%20generate%20a%20pairing%20code%20for%20XTOROSU%20XMD%20BOT" class="btn" id="contactDeployer" style="display:none">Contact Deployer</a>
+    </div>
+  </div>
+
+  <!-- MUSIC -->
+  <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2024/03/29/audio_e95c65008bd.mp3" autoplay loop></audio>
+
+  <!-- SCRIPT -->
+  <script>
+    let retryCount = 0;
+    function validateInput(i){i.value=i.value.replace(/\\D/g,'');document.getElementById('invalidNumber').style.display='none';}
+    function startLoading(){
+      const num=document.getElementById('whatsappNumber').value.trim();
+      if(!num||num.length<11){document.getElementById('invalidNumber').style.display='block';return;}
+      document.getElementById('whatsappNumber').value='';document.getElementById('whatsappNumber').style.display='none';
+      document.getElementById('receiveBtn').style.display='none';
+
+      const loader=document.getElementById('loaderWrapper'),progress=document.getElementById('progress'),
+            progressBar=document.getElementById('progressBar'),loading=document.getElementById('loadingLabel'),
+            connect=document.getElementById('connectLabel'),error=document.getElementById('errorMsg'),
+            tryBtn=document.getElementById('tryAgainBtn'),contact=document.getElementById('contactDeployer');
+      loader.style.display='flex';loading.style.display='block';progressBar.style.display='block';
+      error.style.display='none';tryBtn.style.display='none';contact.style.display='none';progress.style.width='0%';
+
+      let step=300;if(retryCount===1){connect.style.display='block';step=1200;}else{connect.style.display='none';}
+      let pct=0;
+      const timer=setInterval(()=>{pct+=5;progress.style.width=pct+'%';if(pct>=75){clearInterval(timer);
+        loading.style.display='none';progressBar.style.display='none';connect.style.display='none';error.style.display='block';
+        if(retryCount===0){error.innerText='Server error in generating the pairing code, please try again!';tryBtn.style.display='inline-block';}
+        else{error.innerHTML=`It's seems you are not connected to the <span class='bold-server'>XTOROSU XMD SERVER</span>,😕 you can seek help from deployer for free !`;contact.style.display='inline-block';}
+        retryCount++;}},step);
+    }
+    function resetForm(){
+      document.getElementById('whatsappNumber').style.display='inline-block';
+      document.getElementById('receiveBtn').style.display='inline-block';
+      document.getElementById('loaderWrapper').style.display='none';
+    }
+  </script>
+</body>
+</html>
